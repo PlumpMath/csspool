@@ -1,8 +1,7 @@
 (ns csspool.core
   (:require [clojure.walk :as walk :only [postwalk]]
+            [clojure.string :as st :refer [split join replace-first]]
             [csspool.cross :as cross :refer [default-browsers]]))
-
-(def browser-pres [nil "-webkit-" "-moz-" "-o-"])
 
 (def minimal {:lb \{ :rb \} :sp nil :nl nil})
 (def pretty {:lb "{\n" :rb "}\n" :sp \space :nl \newline})
@@ -16,8 +15,8 @@
   `(let [{:keys ~'[lb rb sp nl]} *format*] ~@body))
 
 (defn in-pairs
-  "Break sequence or map into lazy seq of kv pairs removing layers of sequence
-  as necessary. Throws for odd number of elements (valueless keys)."
+  "Break sequence or map into lazy seq of kv pairs removing layers as necessary.
+  Throws for odd number of elements (valueless keys)."
   [xs]
   (when-let [xs (seq xs)] ; the let permits use with maps
     (if (sequential? (first xs))
@@ -25,11 +24,28 @@
       (lazy-seq (cons [(first xs) (second xs)]
                       (in-pairs (nnext xs)))))))
 
+(defn inherit
+  "Prepend preceding selector(s). Selectors starting with `&` are prepended by
+  the whole preceding selector, while consecutive `%`s will accrue a like number
+  of elements from the preceding selector."
+  [xs]
+  (let [g (fn [[k1 _] [k2 v]]
+            (let [g #(replace-first % "%" (str %2 \space))
+                  k2 (replace-first k2 #"^\&" (str k1 \space))
+                  k2 (reduce g k2 (split k1 #"\s+"))
+                  k2 (replace-first k2 #"\s+:" ":")]
+              [k2 v]))]
+    (reductions g xs)))
+
 (defn prepare
-  "Make tree ready for processing by producing seq (something) like
+  "Make tree ready for processing, producing a seq (something) like
   `([selector ([prop val])] [sel1 ([p1 v1] [p2 v2])])`."
   [xs]
-  (map (fn [[k v]] [k (in-pairs v)]) (in-pairs xs)))
+  (->> xs
+       in-pairs
+       (map (fn [[k v]] [k (in-pairs v)]))
+       (map (fn [[k v]] [(name k) v]))
+       (inherit)))
 
 (defn render-rule
   "Output css string for each selector/ruleset pair."
@@ -46,7 +62,7 @@
   (reduce str (map render-rule c)))
 
 (def quick-render
-  "Prepare and render css in single step, without any processing."
+  "Prepare and render css in single step, without processing."
   (comp render prepare))
 
 (defn prefix
@@ -62,7 +78,7 @@
   ([ps [k v]] (prefix-v ps k v)))
 
 (defn suffix-nums
-  "Transform all numeric values to strings with suffix of s (%, px, em, &c.)."
+  "Transform all numeric values to strings with suffix of `s` (%, px, em, &c.)."
   [s xs]
   (walk/postwalk #(if (number? %) (str % s) %) xs))
 
@@ -104,3 +120,19 @@
                       (prefix ps x)
                       [x])))]
     (map (fn [[k v]] [k (mapcat g v)]) xs)))
+
+(defmacro ^:private def-numeric-suffix
+  ([x y]
+   (let [s #(str
+              "Return spaced string of `xs` with numbers suffixed by `" % "`.")]
+     `(defn ~x ~(s y) [& ~'xs] (join \space (suffix-nums ~y ~'xs)))))
+  ([x] `(def-numeric-suffix ~x ~(str x))))
+
+(def-numeric-suffix pc "%")
+(def-numeric-suffix pt)
+(def-numeric-suffix px)
+(def-numeric-suffix em)
+(def-numeric-suffix cm)
+(def-numeric-suffix in)
+(def-numeric-suffix mm)
+(def-numeric-suffix ex)
