@@ -1,0 +1,70 @@
+.view_port{
+  background-color: black;
+  height: 25px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+}
+.cylon_eye{
+  color: white;
+  height: 100%;
+  width: 20%;
+  background-color: red;
+  animation: move_eye 3s linear 0s infinite alternate;
+  -moz-animation: move_eye 3s linear 0s infinite alternate;
+  -o-animation: move_eye 3s linear 0s infinite alternate;
+  -webkit-animation: move_eye 3s linear 0s infinite alternate;
+  background-image: -moz-linear-gradient(left, rgba(0,0,0,0.9) 25%, rgba( 0,0,0,0.1 ) 50%, rgba( 0,0,0,0.9 ) 75%);
+  background-image: -ms-linear-gradient(left, rgba(0,0,0,0.9) 25%, rgba( 0,0,0,0.1 ) 50%, rgba( 0,0,0,0.9 ) 75%);
+  background-image: linear-gradient(left, rgba(0,0,0,0.9) 25%, rgba( 0,0,0,0.1 ) 50%, rgba( 0,0,0,0.9 ) 75%);
+  background-image: -o-linear-gradient(left, rgba(0,0,0,0.9) 25%, rgba( 0,0,0,0.1 ) 50%, rgba( 0,0,0,0.9 ) 75%);
+  background-image: -webkit-linear-gradient(left, rgba(0,0,0,0.9) 25%, rgba( 0,0,0,0.1 ) 50%, rgba( 0,0,0,0.9 ) 75%);
+}
+.polling_message{
+  float: left;
+  margin-left: 10%;
+  color: white;
+  margin-top: 3px;
+  margin-right: 2%;
+}
+ @-moz-keyframes move_eye{
+from{
+  margin-left: -20%;
+}
+to{
+  margin-left: 100%;
+}
+}
+@-ms-keyframes move_eye{
+from{
+  margin-left: -20%;
+}
+to{
+  margin-left: 100%;
+}
+}
+@keyframes move_eye{
+from{
+  margin-left: -20%;
+}
+to{
+  margin-left: 100%;
+}
+}
+@-o-keyframes move_eye{
+from{
+  margin-left: -20%;
+}
+to{
+  margin-left: 100%;
+}
+}
+@-webkit-keyframes move_eye{
+from{
+  margin-left: -20%;
+}
+to{
+  margin-left: 100%;
+}
+}
