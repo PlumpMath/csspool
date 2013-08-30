@@ -3033,7 +3033,6 @@ net.brehaut.ClojureTools = (function (SH) {
 </td><td class="codes"><pre class="brush: clojure">(ns csspool.core
   (:require [clojure.walk :as walk :only [postwalk]]
             [csspool.cross :as cross :refer [default-browsers]]))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(def browser-pres [nil &quot;-webkit-&quot; &quot;-moz-&quot; &quot;-o-&quot;])</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(def minimal {:lb \{ :rb \} :sp nil :nl nil})
 (def pretty {:lb &quot;{\n&quot; :rb &quot;}\n&quot; :sp \space :nl \newline})
 (def ^:dynamic *format* minimal)
@@ -3082,9 +3081,9 @@ net.brehaut.ClojureTools = (function (SH) {
   (with-format
       (str (name x) lb (quick-render ys) rb)))</pre></td></tr><tr><td class="docs"><p>Return seq of k v pairs with key prefixed for each major browser.</p>
 </td><td class="codes"><pre class="brush: clojure">(def xb
-  (partial prefix (default-browsers)))</pre></td></tr><tr><td class="docs"><p>Return seq of k v pairs with value prefixed for each major browser.</p>
+  (partial prefix default-browsers))</pre></td></tr><tr><td class="docs"><p>Return seq of k v pairs with value prefixed for each major browser.</p>
 </td><td class="codes"><pre class="brush: clojure">(def xb-v
-  (partial prefix-v (default-browsers)))</pre></td></tr><tr><td class="docs"><p>Return string comprising an at-rule (q.v.) for each prefix in <code>ps</code>.</p>
+  (partial prefix-v default-browsers))</pre></td></tr><tr><td class="docs"><p>Return string comprising an at-rule (q.v.) for each prefix in <code>ps</code>.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn prefix-at-rule
   [ps x]
   (let [ps (map #(str \@ %) ps)]
@@ -3094,7 +3093,7 @@ net.brehaut.ClojureTools = (function (SH) {
          (map at-rule)
          (reduce str))))</pre></td></tr><tr><td class="docs"><p>Return string comprising an at-rule (q.v.) for each major browser.</p>
 </td><td class="codes"><pre class="brush: clojure">(def at-rule-xb
-  (partial prefix-at-rule (default-browsers)))</pre></td></tr><tr><td class="docs"><p>Return new selector/ruleset seq with prefixed versions as necessary for css
+  (partial prefix-at-rule default-browsers))</pre></td></tr><tr><td class="docs"><p>Return new selector/ruleset seq with prefixed versions as necessary for css
   properties found in <code>cross/*needful*</code>. Only as good as <code>*needful*</code> is
   accurate.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn auto-prefix
@@ -3108,7 +3107,7 @@ net.brehaut.ClojureTools = (function (SH) {
   <code>:o</code> -> Opera, <code>:w</code> -> webkit family, and, least, <code>:i</code> -> Internet Explorer.</p>
 </td><td class="codes"><pre class="brush: clojure">(def browsers
   {:n nil :m &quot;-moz-&quot; :w &quot;-webkit-&quot; :o &quot;-o-&quot; :i &quot;-ms-&quot;})</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn default-browsers [] (vals browsers))</pre></td></tr><tr><td class="docs"><p>Return seq of browser prefices mapped from each b, or nil. See <code>browsers</code>.</p>
+</td><td class="codes"><pre class="brush: clojure">(def default-browsers (vals browsers))</pre></td></tr><tr><td class="docs"><p>Return seq of browser prefices mapped from each b, or nil. See <code>browsers</code>.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn xb-pres
   [bs]
   (seq (map browsers bs)))</pre></td></tr><tr><td class="docs"><p>Map of css property to seq of <code>browsers</code> keys they require.</p>
