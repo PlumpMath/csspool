@@ -77,11 +77,11 @@ by `auto-prefix.` (`xb-v` means cross browser value.)
 ```
 ## Example
 
-Have an [annotated, working example.](//crooney.github.io/csspool)
+Have an [annotated, working example.](crooney.github.io/csspool)
 
 ## Documentation
 
-[Sure](//crooney.github.io/csspool/uberjar.html). Doesn't cost me anything.
+[Sure](crooney.github.io/csspool/uberjar.html). Doesn't cost me anything.
 
 ## License
 
