@@ -5,7 +5,7 @@
   `:o` -> Opera, `:w` -> webkit family, and, least, `:i` -> Internet Explorer."
   {:n nil :m "-moz-" :w "-webkit-" :o "-o-" :i "-ms-"})
 
-(defn default-browsers [] (vals browsers))
+(def default-browsers (vals browsers))
 
 (defn xb-pres
   "Return seq of browser prefices mapped from each b, or nil. See `browsers`."

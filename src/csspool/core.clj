@@ -74,11 +74,11 @@
 
 (def xb
   "Return seq of k v pairs with key prefixed for each major browser."
-  (partial prefix (default-browsers)))
+  (partial prefix default-browsers))
 
 (def xb-v
   "Return seq of k v pairs with value prefixed for each major browser."
-  (partial prefix-v (default-browsers)))
+  (partial prefix-v default-browsers))
 
 (defn prefix-at-rule
   "Return string comprising an at-rule (q.v.) for each prefix in `ps`."
@@ -92,7 +92,7 @@
 
 (def at-rule-xb
   "Return string comprising an at-rule (q.v.) for each major browser."
-  (partial prefix-at-rule (default-browsers)))
+  (partial prefix-at-rule default-browsers))
 
 (defn auto-prefix
   "Return new selector/ruleset seq with prefixed versions as necessary for css
