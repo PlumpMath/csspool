@@ -6,12 +6,12 @@
 (def styles
   (let [w :white]
   `[ ;; the raw number 100 will be dealt with later
-    .view_port [background-color black height :25px width 50 overflow hidden
+    .view_port [background-color black height :25px width 100 overflow hidden
                 ;; border-radius will be automatically prefixed for webkit
                 ;; (works in FF without prefix)
                 border-radius :10px]
     ;; escape the mixin w and ignore raw numbers.
-    .cylon_eye [color ~w height 100 width 40 background-color red
+    .cylon_eye [color ~w height 100 width 20 background-color red
                 ;; animation will be prefixed for webkit, mozilla, and opera
                 animation "move_eye 3s linear 0s infinite alternate"
                 ;; background-image is a value, not a property, so it has to be
