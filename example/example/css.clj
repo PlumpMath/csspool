@@ -5,13 +5,19 @@
 
 (def styles
   (let [w :white]
-  `[ ;; the raw number 100 will be dealt with later
-    .view_port [background-color black height :25px width 100 overflow hidden
+  `[.view_port [background-color black height :25px width 100 overflow hidden
                 ;; border-radius will be automatically prefixed for webkit
                 ;; (works in FF without prefix)
                 border-radius :10px]
-    ;; escape the mixin w and ignore raw numbers.
-    .cylon_eye [color ~w height 100 width 20 background-color red
+    ;; '&' gets replaced with preceding selector: here ".view_port .message"
+    &.message {color ~w float left margin-right 2 margin-left 10
+                       margin-top :3px}
+    &:before (content "\"Bitchen \"")
+    ;; `%` at the beginning takes one element of preceding for each `%`
+    ;; here we get ".view_port .message" w/o ":before"
+    %%:after (content "\"!\"")
+    ;; 1 '%' to produce ".view_port .cylon_eye"
+    %.cylon_eye [color ~w height 100 width 20 background-color red
                 ;; animation will be prefixed for webkit, mozilla, and opera
                 animation "move_eye 3s linear 0s infinite alternate"
                 ;; background-image is a value, not a property, so it has to be
@@ -19,8 +25,6 @@
                 ;; generally, the right thing is done wrt tree-depth, so it
                 ;; wouldn't matter if we forgot the @.
                 ~@(c/xb-v '(background-image "linear-gradient(left, rgba(0,0,0,0.9) 25%, rgba( 0,0,0,0.1 ) 50%, rgba( 0,0,0,0.9 ) 75%)"))]
-     ;; maps are fine
-   .polling_message {color ~w float left margin-right 2 margin-left 10 margin-top :3px}
  ]))
 
 (def at-styles
@@ -30,16 +34,8 @@
 
 (defn -main [& args]
   (c/with-pretty ; not overly pretty. newlines, anyway.
-    (print (->> styles
-                ;; regularize for processing. arbitrary levels of depth are flattened.
-                c/prepare
-                ;; all raw numbers converted to strings ending in \%
-                (c/suffix-nums \%)
-                ;; handle animation and border-radius from above as well as many
-                ;; more. only adds prefices necessary and known to work. (well ...)
-                c/auto-prefix
-                ;; spit it out
-                c/render)
-           ;; have the at-rules work with all browsers
-           (c/at-rule-xb at-styles))))
+    (c/add-processors [c/suffix-pc] ; all naked numerals become string + '%'
+                      (print (c/css styles)
+                             ;; have the at-rules work with all browsers
+                             (c/at-rule-xb at-styles)))))
 ;;; ces't tout
