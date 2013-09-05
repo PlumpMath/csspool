@@ -11,10 +11,11 @@ automagic where possible and painless where not.
 
 Probably not, but I did. I wanted one that worked in Clojure, had a forgiving
 and manipulable structure and made cross browser pain go away. None of the libs
-I could find satisfied me, as they seemed overly rigid in structure, mandating
-map here but vector here, etc. Also, although this is quite understandable,
+I could find satisfied me, as they seemed overly rigid in structure, and
+structured css by mirroring Clojure data structures, which is at best awkward.
+Also, although this is quite understandable,
 they required all selectors, properties and values to be keywords or strings.
-By handling syntax quote strings `csspool` allows what appear to be barewords.
+By operatingon  syntax quote strings `csspool` allows what appear to be barewords.
 
 `csspool` can also prefix all properties that need it to work across browsers
 automatically and efficiently -- only those prefices necessary for the property
@@ -27,21 +28,22 @@ prefix, so one plain and three prefixed versions make it into the final css.
 
 ```clojure
 (def styles
-  [;; simple
-   '(.my-div [height 100 width 60 float left])
-   ;; throw in some mixins, and use a map this time
-   (let [c1 :white c2 'red c3 "#FFF"]
-     `(.his-div {color ~c1 background ~c3 outline-color ~(if (= c1 c3) c2 c3)}))
-   ;; let's prefix
-   `(.her-div [tab-size :40px flex :1 flex-grow :2
-               ~@(xb-v '(background-image "linear-gradient(left,blue,red)"))])])
+  `[.my-div [height 100 width 60 float left]
+    ~@(let [c1 :white c2 'red c3 "#FFF"] ; depth difference fixed invisibly
+        `(.his-div {color ~c1 background ~c3 outline-color ~(if (= c1 c3) c2 c3)}))
+    ;; all will be prefixed as needed.
+    .her-div [tab-size :40px flex :1 flex-grow :2]
+    ;; initial '&' will add entire preceding selector (.her-div ul).
+    &ul [color green]
+    ;; (.her-div ul li)
+    &li (color blue)
+    ;; % will add one pirce of preceding for each % (.her-div ul:hover)
+    %%:hover {background-color red}
+    ])
 
-(with-pretty
-  (print (->> styles
-              prepare          ; regularize for processing
-              (suffix-nums \%) ; any naked numerals are made percentages
-              auto-prefix      ; on the tin
-              render)))        ; spit a string
+(add-processors [suffix-px] ; add px to any naked numerals
+  (with-pretty ; not minified
+    (print (css styles))))
 ```
 
 This produces the output that follows. Without `with-pretty` it would have been
@@ -51,14 +53,14 @@ by `auto-prefix.` (`xb-v` means cross browser value.)
 
 ```css
 .my-div{
-  height: 100%;
-  width: 60%;
+  height: 100px;
+  width: 60px;
   float: left;
 }
 .his-div{
+  background: #FFF;
   outline-color: #FFF;
   color: white;
-  background: #FFF;
 }
 .her-div{
   tab-size: 40px;
@@ -68,11 +70,15 @@ by `auto-prefix.` (`xb-v` means cross browser value.)
   -ms-flex: 1;
   flex-grow: 2;
   -webkit-flex-grow: 2;
-  background-image: -moz-linear-gradient(left,blue,red);
-  background-image: -ms-linear-gradient(left,blue,red);
-  background-image: linear-gradient(left,blue,red);
-  background-image: -o-linear-gradient(left,blue,red);
-  background-image: -webkit-linear-gradient(left,blue,red);
+}
+.her-div ul{
+  color: green;
+}
+.her-div ul li{
+  color: blue;
+}
+.her-div ul:hover{
+  background-color: red;
 }
 ```
 ## Example
