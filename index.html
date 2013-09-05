@@ -66,10 +66,8 @@ visual noise, annotations disappear on hover.</p>
     <span class="nv">%.cylon_eye</span> <span class="p">[</span><span class="nv">color</span> <span class="o">~</span><span class="nv">w</span> <span class="nv">height</span> <span class="mi">100</span> <span class="nv">width</span> <span class="mi">20</span> <span class="nv">background-color</span> <span class="nv">red</span>
                 <span class="c1">;; animation will be prefixed for webkit, mozilla, and opera</span>
                 <span class="nv">animation</span> <span class="s">"move_eye 3s linear 0s infinite alternate"</span>
-                <span class="c1">;; background-image is a value, not a property, so it has to be</span>
+                <span class="c1">;; linear-gradient is a value, not a property, so it has to be</span>
                 <span class="c1">;; explicitly prefixed. (xb-v = cross-browser-value).</span>
-                <span class="c1">;; generally, the right thing is done wrt tree-depth, so it</span>
-                <span class="c1">;; wouldn't matter if we forgot the @.</span>
                 <span class="o">~@</span><span class="p">(</span><span class="nf">c/xb-v</span> <span class="o">'</span><span class="p">(</span><span class="nf">background-image</span> <span class="s">"linear-gradient(left, rgba(0,0,0,0.9) 25%, rgba( 0,0,0,0.1 ) 50%, rgba( 0,0,0,0.9 ) 75%)"</span><span class="p">))]</span>
  <span class="p">]))</span>
 
