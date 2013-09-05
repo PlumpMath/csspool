@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <link rel="stylesheet" href="stylesheets/cylon.css" type="text/css">
+    <style type="text/css">
+.highlight:hover .c1 {display:none;}
+    </style>
     <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
@@ -32,25 +35,34 @@
 <a name="cylon-eye" class="anchor" href="#cylon-eye"><span class="octicon octicon-link"></span></a>Cylon Eye?</h3>
 
 <div class="view_port">
-    <div class="polling_message"> Bitchen Cylon Eye </div>
+    <div class="message">Cylon Eye</div>
     <div class="cylon_eye"></div>
 </div>
 
 <br/>
 <p>The <a href="stylesheets/cylon.css">css</a> powering our robotic friend comes completely
-from the code below, annotated inline.</p>
+from the code below, annotated inline.<br/> Annotations disappear on hover.</p>
 
-<div class="highlight"><pre><span class="p">(</span><span class="kd">ns </span><span class="nv">example.css</span> <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">csspool.core</span> <span class="ss">:as</span> <span class="nv">c</span><span class="p">]))</span>
+<div class="highlight"><pre><span class="c1">;;; The cylon eye css which is adapted here originally comes from:</span>
+<span class="c1">;;; https://developer.mozilla.org/en-US/docs/Web/CSS/animation</span>
+
+<span class="p">(</span><span class="kd">ns </span><span class="nv">example.css</span> <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">csspool.core</span> <span class="ss">:as</span> <span class="nv">c</span><span class="p">]))</span>
 
 <span class="p">(</span><span class="k">def </span><span class="nv">styles</span>
   <span class="p">(</span><span class="k">let </span><span class="p">[</span><span class="nv">w</span> <span class="ss">:white</span><span class="p">]</span>
-  <span class="o">`</span><span class="p">[</span> <span class="c1">;; the raw number 100 will be dealt with later</span>
-    <span class="nv">.view_port</span> <span class="p">[</span><span class="nv">background-color</span> <span class="nv">black</span> <span class="nv">height</span> <span class="ss">:25px</span> <span class="nv">width</span> <span class="mi">100</span> <span class="nv">overflow</span> <span class="nv">hidden</span>
+  <span class="o">`</span><span class="p">[</span><span class="nv">.view_port</span> <span class="p">[</span><span class="nv">background-color</span> <span class="nv">black</span> <span class="nv">height</span> <span class="ss">:25px</span> <span class="nv">width</span> <span class="mi">100</span> <span class="nv">overflow</span> <span class="nv">hidden</span>
                 <span class="c1">;; border-radius will be automatically prefixed for webkit</span>
                 <span class="c1">;; (works in FF without prefix)</span>
                 <span class="nv">border-radius</span> <span class="ss">:10px</span><span class="p">]</span>
-    <span class="c1">;; escape the mixin w and ignore raw numbers.</span>
-    <span class="nv">.cylon_eye</span> <span class="p">[</span><span class="nv">color</span> <span class="o">~</span><span class="nv">w</span> <span class="nv">height</span> <span class="mi">100</span> <span class="nv">width</span> <span class="mi">20</span> <span class="nv">background-color</span> <span class="nv">red</span>
+    <span class="c1">;; '&amp;' gets replaced with preceding selector: here ".view_port .message"</span>
+    <span class="o">&amp;</span><span class="nv">.message</span> <span class="p">{</span><span class="nv">color</span> <span class="o">~</span><span class="nv">w</span> <span class="nb">float left </span><span class="nv">margin-right</span> <span class="mi">2</span> <span class="nv">margin-left</span> <span class="mi">10</span>
+                       <span class="nv">margin-top</span> <span class="ss">:3px</span><span class="p">}</span>
+    <span class="o">&amp;</span><span class="ss">:before</span> <span class="p">(</span><span class="nf">content</span> <span class="s">"\"Bitchen \""</span><span class="p">)</span>
+    <span class="c1">;; `%` at the beginning takes one element of preceding for each `%`</span>
+    <span class="c1">;; here we get ".view_port .message" w/o ":before"</span>
+    <span class="nv">%%</span><span class="ss">:after</span> <span class="p">(</span><span class="nf">content</span> <span class="s">"\"!\""</span><span class="p">)</span>
+    <span class="c1">;; 1 '%' to produce ".view_port .cylon_eye"</span>
+    <span class="nv">%.cylon_eye</span> <span class="p">[</span><span class="nv">color</span> <span class="o">~</span><span class="nv">w</span> <span class="nv">height</span> <span class="mi">100</span> <span class="nv">width</span> <span class="mi">20</span> <span class="nv">background-color</span> <span class="nv">red</span>
                 <span class="c1">;; animation will be prefixed for webkit, mozilla, and opera</span>
                 <span class="nv">animation</span> <span class="s">"move_eye 3s linear 0s infinite alternate"</span>
                 <span class="c1">;; background-image is a value, not a property, so it has to be</span>
@@ -58,8 +70,6 @@ from the code below, annotated inline.</p>
                 <span class="c1">;; generally, the right thing is done wrt tree-depth, so it</span>
                 <span class="c1">;; wouldn't matter if we forgot the @.</span>
                 <span class="o">~@</span><span class="p">(</span><span class="nf">c/xb-v</span> <span class="o">'</span><span class="p">(</span><span class="nf">background-image</span> <span class="s">"linear-gradient(left, rgba(0,0,0,0.9) 25%, rgba( 0,0,0,0.1 ) 50%, rgba( 0,0,0,0.9 ) 75%)"</span><span class="p">))]</span>
-     <span class="c1">;; maps are fine</span>
-   <span class="nv">.polling_message</span> <span class="p">{</span><span class="nv">color</span> <span class="o">~</span><span class="nv">w</span> <span class="nb">float left </span><span class="nv">margin-right</span> <span class="mi">2</span> <span class="nv">margin-left</span> <span class="mi">10</span> <span class="nv">margin-top</span> <span class="ss">:3px</span><span class="p">}</span>
  <span class="p">]))</span>
 
 <span class="p">(</span><span class="k">def </span><span class="nv">at-styles</span>
@@ -69,18 +79,10 @@ from the code below, annotated inline.</p>
 
 <span class="p">(</span><span class="kd">defn </span><span class="nv">-main</span> <span class="p">[</span><span class="o">&amp;</span> <span class="nv">args</span><span class="p">]</span>
   <span class="p">(</span><span class="nf">c/with-pretty</span> <span class="c1">; not overly pretty. newlines, anyway.</span>
-    <span class="p">(</span><span class="nb">print </span><span class="p">(</span><span class="nf">-&gt;&gt;</span> <span class="nv">styles</span>
-                <span class="c1">;; regularize for processing. arbitrary levels of depth are flattened.</span>
-                <span class="nv">c/prepare</span>
-                <span class="c1">;; all raw numbers converted to strings ending in \%</span>
-                <span class="p">(</span><span class="nf">c/suffix-nums</span> <span class="sc">\%</span><span class="p">)</span>
-                <span class="c1">;; handle animation and border-radius from above as well as many</span>
-                <span class="c1">;; more. only adds prefices necessary and known to work. (well ...)</span>
-                <span class="nv">c/auto-prefix</span>
-                <span class="c1">;; spit it out</span>
-                <span class="nv">c/render</span><span class="p">)</span>
-           <span class="c1">;; have the at-rules work with all browsers</span>
-           <span class="p">(</span><span class="nf">c/at-rule-xb</span> <span class="nv">at-styles</span><span class="p">))))</span>
+    <span class="p">(</span><span class="nf">c/add-processors</span> <span class="p">[</span><span class="nv">c/suffix-pc</span><span class="p">]</span> <span class="c1">; all naked numerals become string + '%'</span>
+                      <span class="p">(</span><span class="nb">print </span><span class="p">(</span><span class="nf">c/css</span> <span class="nv">styles</span><span class="p">)</span>
+                             <span class="c1">;; have the at-rules work with all browsers</span>
+                             <span class="p">(</span><span class="nf">c/at-rule-xb</span> <span class="nv">at-styles</span><span class="p">)))))</span>
 <span class="c1">;;; ces't tout</span>
 </pre></div>
 

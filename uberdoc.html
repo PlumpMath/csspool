@@ -3032,39 +3032,8 @@ net.brehaut.ClojureTools = (function (SH) {
 </div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.5.1</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#csspool.core">csspool.core</a></li><li><a href="#csspool.cross">csspool.cross</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#csspool.core" name="csspool.core"><h1 class="project-name">csspool.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(ns csspool.core
   (:require [clojure.walk :as walk :only [postwalk]]
-            [csspool.cross :as cross :refer [default-browsers]]))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(def minimal {:lb \{ :rb \} :sp nil :nl nil})
-(def pretty {:lb &quot;{\n&quot; :rb &quot;}\n&quot; :sp \space :nl \newline})
-(def ^:dynamic *format* minimal)
-(defmacro with-pretty [&amp; body] `(binding [*format* pretty] ~@body))</pre></td></tr><tr><td class="docs"><p>ANAPHORIC! Captures <code>lb rb sp</code> and <code>nl</code> (from <code>*format*</code>), representing
-  braces, space and newline.</p>
-</td><td class="codes"><pre class="brush: clojure">(defmacro with-format
-  [&amp; body]
-  `(let [{:keys ~'[lb rb sp nl]} *format*] ~@body))</pre></td></tr><tr><td class="docs"><p>Break sequence or map into lazy seq of kv pairs removing layers of sequence
-  as necessary. Throws for odd number of elements (valueless keys).</p>
-</td><td class="codes"><pre class="brush: clojure">(defn in-pairs
-  [xs]
-  (when-let [xs (seq xs)] ; the let permits use with maps
-    (if (sequential? (first xs))
-      (lazy-cat (in-pairs (first xs)) (in-pairs (next xs)))
-      (lazy-seq (cons [(first xs) (second xs)]
-                      (in-pairs (nnext xs)))))))</pre></td></tr><tr><td class="docs"><p>Make tree ready for processing by producing seq (something) like
-  <code>([selector ([prop val])] [sel1 ([p1 v1] [p2 v2])])</code>.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn prepare
-  [xs]
-  (map (fn [[k v]] [k (in-pairs v)]) (in-pairs xs)))</pre></td></tr><tr><td class="docs"><p>Output css string for each selector/ruleset pair.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn render-rule
-  ([[sel rules]]
-   (with-format
-     (let [g (fn [[k v]]
-               (str sp sp (name k) \: sp (if (number? v) v (name v)) \; nl))]
-       (str (name sel) lb (reduce str (map g rules)) rb))))
-  ([sel rules] (render-rule [sel rules])))</pre></td></tr><tr><td class="docs"><p>Output css for map or seq of selector/ruleset pairs</p>
-</td><td class="codes"><pre class="brush: clojure">(defn render
-  [c]
-  (reduce str (map render-rule c)))</pre></td></tr><tr><td class="docs"><p>Prepare and render css in single step, without any processing.</p>
-</td><td class="codes"><pre class="brush: clojure">(def quick-render
-  (comp render prepare))</pre></td></tr><tr><td class="docs"><p>Produce seq of <code>k v</code> pairs where each <code>k</code> is prefixed with one of <code>ps</code>.</p>
+            [clojure.string :as st :refer [split join replace-first]]
+            [csspool.cross :as cross :refer [default-browsers]]))</pre></td></tr><tr><td class="docs"><p>Produce seq of <code>k v</code> pairs where each <code>k</code> is prefixed with one of <code>ps</code>.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn prefix
   ([ps k v]
    (map (fn [x] [(str x (name k)) v]) ps))
@@ -3072,18 +3041,88 @@ net.brehaut.ClojureTools = (function (SH) {
 </td><td class="codes"><pre class="brush: clojure">(defn prefix-v
   ([ps k v]
   (map (fn [[x y]] [y x]) (prefix ps v k)))
-  ([ps [k v]] (prefix-v ps k v)))</pre></td></tr><tr><td class="docs"><p>Transform all numeric values to strings with suffix of s (%, px, em, &amp;c.).</p>
-</td><td class="codes"><pre class="brush: clojure">(defn suffix-nums
-  [s xs]
-  (walk/postwalk #(if (number? %) (str % s) %) xs))</pre></td></tr><tr><td class="docs"><p>Render a css at-rule (that's what the W3C calls them) to string.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn at-rule
-  [[x ys]]
-  (with-format
-      (str (name x) lb (quick-render ys) rb)))</pre></td></tr><tr><td class="docs"><p>Return seq of k v pairs with key prefixed for each major browser.</p>
+  ([ps [k v]] (prefix-v ps k v)))</pre></td></tr><tr><td class="docs"><p>Return seq of k v pairs with key prefixed for each major browser.</p>
 </td><td class="codes"><pre class="brush: clojure">(def xb
   (partial prefix default-browsers))</pre></td></tr><tr><td class="docs"><p>Return seq of k v pairs with value prefixed for each major browser.</p>
 </td><td class="codes"><pre class="brush: clojure">(def xb-v
-  (partial prefix-v default-browsers))</pre></td></tr><tr><td class="docs"><p>Return string comprising an at-rule (q.v.) for each prefix in <code>ps</code>.</p>
+  (partial prefix-v default-browsers))</pre></td></tr><tr><td class="docs"><p>Break sequence or map into lazy seq of kv pairs removing layers as necessary.
+  Throws for odd number of elements (valueless keys).</p>
+</td><td class="codes"><pre class="brush: clojure">(defn in-pairs
+  [xs]
+  (when-let [xs (seq xs)] ; the let permits use with maps
+    (if (sequential? (first xs))
+      (lazy-cat (in-pairs (first xs)) (in-pairs (next xs)))
+      (lazy-seq (cons [(first xs) (second xs)]
+                      (in-pairs (nnext xs)))))))</pre></td></tr><tr><td class="docs"><p>Prepend preceding selector(s). Selectors starting with <code>&amp;</code> are prepended by
+  the whole preceding selector, while consecutive <code>%</code>s will accrue a like number
+  of elements from the preceding selector.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn inherit
+  [xs]
+  (let [g (fn [[k1 _] [k2 v]]
+            (let [h #(replace-first % &quot;%&quot; (str %2 \space))
+                  k2 (replace-first k2 #&quot;^\&amp;&quot; (str k1 \space))
+                  k2 (reduce h k2 (split k1 #&quot;[\s:]+&quot;))
+                  k2 (replace-first k2 #&quot;\s+:&quot; &quot;:&quot;)]
+              [k2 v]))]
+    (reductions g xs)))</pre></td></tr><tr><td class="docs"><p>Make tree ready for processing, producing a seq (something) like
+  <code>([selector ([prop val])] [sel1 ([p1 v1] [p2 v2])])</code>.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn prepare
+  [xs]
+  (-&gt;&gt; xs
+       in-pairs
+       (map (fn [[k v]] [k (in-pairs v)]))
+       (map (fn [[k v]] [(name k) v]))
+       (inherit)))</pre></td></tr><tr><td class="docs"><p>Format map for minified css.</p>
+</td><td class="codes"><pre class="brush: clojure">(def minimal  {:lb \{ :rb \} :sp nil :nl nil})</pre></td></tr><tr><td class="docs"><p>Format map for readable css.</p>
+</td><td class="codes"><pre class="brush: clojure">(def pretty 
+            {:lb &quot;{\n&quot; :rb &quot;}\n&quot; :sp \space :nl \newline})</pre></td></tr><tr><td class="docs"><p>Rebindable format map.</p>
+</td><td class="codes"><pre class="brush: clojure">(def ^:dynamic *format*  minimal)</pre></td></tr><tr><td class="docs"><p>Produce readable css</p>
+</td><td class="codes"><pre class="brush: clojure">(defmacro with-pretty 
+  [&amp; body] `(binding [*format* pretty] ~@body))</pre></td></tr><tr><td class="docs"><p>ANAPHORIC! Captures <code>lb rb sp</code> and <code>nl</code> (from <code>*format*</code>), representing
+  braces, space and newline.</p>
+</td><td class="codes"><pre class="brush: clojure">(defmacro ^:private with-format
+  [&amp; body]
+  `(let [{:keys ~'[lb rb sp nl]} *format*] ~@body))</pre></td></tr><tr><td class="docs"><p>Output css string for each selector/ruleset pair.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn render-rule
+  ([[sel rules]]
+   (with-format
+     (let [g (fn [[k v]]
+               (str sp sp (name k) \: sp (if (number? v) v (name v)) \; nl))]
+       (str (name sel) lb (reduce str (map g rules)) rb))))
+  ([sel rules] (render-rule [sel rules])))</pre></td></tr><tr><td class="docs"><p>Output css for map or seq of selector/ruleset pairs.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn render
+  [c]
+  (reduce str (map render-rule c)))</pre></td></tr><tr><td class="docs"><p>Return new selector/ruleset seq with prefixed versions as necessary for css
+  properties found in <code>cross/*needful*</code>. Only as good as <code>*needful*</code> is
+  accurate. Suitable for <code>*processors*</code> inclusion.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn auto-prefix
+  [xs]
+  (let [g (fn [x] (when (seq x)
+                    (if-let [ps (cross/prop-pres (first x))]
+                      (prefix ps x)
+                      [x])))]
+    (map (fn [[k v]] [k (mapcat g v)]) xs)))</pre></td></tr><tr><td class="docs"><p>Default selector/ruleset processors</p>
+</td><td class="codes"><pre class="brush: clojure">(def ^:dynamic *processors*  [auto-prefix])</pre></td></tr><tr><td class="docs"><p>Specify selector/ruleset processors to be used prior to rendering.</p>
+</td><td class="codes"><pre class="brush: clojure">(defmacro with-processors
+  [ps &amp; body]
+  `(binding [*processors* ~ps] ~@body))</pre></td></tr><tr><td class="docs"><p>Add selector/ruleset processors to be used prior to defaults.</p>
+</td><td class="codes"><pre class="brush: clojure">(defmacro add-processors
+  [ps &amp; body]
+  `(with-processors ~(vec (concat ps *processors*)) ~@body))</pre></td></tr><tr><td class="docs"><p>Prepare, process and render tree into string of css. <code>*processors*</code> may be
+  rebound to affect behavior.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn css
+  [xs]
+  (let [g (apply comp *processors*)]
+    (-&gt;&gt; xs
+         prepare
+         g
+         render)))</pre></td></tr><tr><td class="docs"><p>Prepare and render css without intermediate processing.</p>
+</td><td class="codes"><pre class="brush: clojure">(def raw-css
+  (with-processors [identity] css))</pre></td></tr><tr><td class="docs"><p>Render a css at-rule (@media, @keyframes, &amp;c.) to string.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn at-rule
+  [[x ys]]
+  (with-format
+      (str (name x) lb (css ys) rb)))</pre></td></tr><tr><td class="docs"><p>Return string comprising an at-rule for each prefix in <code>ps</code>.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn prefix-at-rule
   [ps x]
   (let [ps (map #(str \@ %) ps)]
@@ -3091,18 +3130,31 @@ net.brehaut.ClojureTools = (function (SH) {
          (prefix ps)
          concat
          (map at-rule)
-         (reduce str))))</pre></td></tr><tr><td class="docs"><p>Return string comprising an at-rule (q.v.) for each major browser.</p>
+         (reduce str))))</pre></td></tr><tr><td class="docs"><p>Return string comprising an at-rule for each major browser.</p>
 </td><td class="codes"><pre class="brush: clojure">(def at-rule-xb
-  (partial prefix-at-rule default-browsers))</pre></td></tr><tr><td class="docs"><p>Return new selector/ruleset seq with prefixed versions as necessary for css
-  properties found in <code>cross/*needful*</code>. Only as good as <code>*needful*</code> is
-  accurate.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn auto-prefix
-  [xs]
-  (let [g (fn [x] (when (seq x)
-                    (if-let [ps (cross/prop-pres (first x))]
-                      (prefix ps x)
-                      [x])))]
-    (map (fn [[k v]] [k (mapcat g v)]) xs)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#csspool.cross" name="csspool.cross"><h1 class="project-name">csspool.cross</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+  (partial prefix-at-rule default-browsers))</pre></td></tr><tr><td class="docs"><p>Transform all numeric values to strings with suffix of <code>s</code> (%, px, em, &amp;c.).
+  Suitable for <code>*processors*</code> inclusion.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn suffix-nums
+  [s xs]
+  (walk/postwalk #(if (number? %) (str % s) %) xs))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmacro ^:private def-numeric-suffix
+  ([x y]
+   (let [s #(str
+              &quot;Return spaced string of `xs` with numbers suffixed by '&quot; % &quot;'.&quot;)
+         t #(str &quot;Transform numeric vals to strings with `&quot; %
+                 &quot;` appended. Suitable for `*processors*` inclusion.&quot;)]
+     `(do
+        (def ~(symbol (str &quot;suffix-&quot; x)) ~(t y) (partial suffix-nums ~y))
+        (defn ~x ~(s y) [&amp; ~'xs] (join \space (suffix-nums ~y ~'xs))))))
+  ([x] `(def-numeric-suffix ~x ~(str x))))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def-numeric-suffix pc &quot;%&quot;)
+(def-numeric-suffix pt)
+(def-numeric-suffix px)
+(def-numeric-suffix em)
+(def-numeric-suffix cm)
+(def-numeric-suffix in)
+(def-numeric-suffix mm)
+(def-numeric-suffix ex)</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#csspool.cross" name="csspool.cross"><h1 class="project-name">csspool.cross</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(ns csspool.cross)</pre></td></tr><tr><td class="docs"><p>Map of keyword to browser prefix where <code>:n</code> -> none, <code>:m</code> -> Firefox,
   <code>:o</code> -> Opera, <code>:w</code> -> webkit family, and, least, <code>:i</code> -> Internet Explorer.</p>
 </td><td class="codes"><pre class="brush: clojure">(def browsers
