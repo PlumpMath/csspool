@@ -5,11 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Csspool -- CSS for Clojure</title>
 
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <link rel="stylesheet" href="stylesheets/cylon.css" type="text/css">
     <style type="text/css">
-.highlight:hover .c1 {display:none;}
+pre {font-family:"Droid Sans Mono","Ubuntu Mono", monospace;}
+.highlight:hover pre .c1 {display:none;}
     </style>
     <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -41,11 +43,10 @@
 
 <br/>
 <p>The <a href="stylesheets/cylon.css">css</a> powering our robotic friend comes completely
-from the code below, annotated inline.<br/> Annotations disappear on hover.</p>
+from the code below, annotated inline.<br/> If you prefer to read the code without
+visual noise, annotations disappear on hover.</p>
 
-<div class="highlight"><pre><span class="c1">;;; The cylon eye css which is adapted here originally comes from:</span>
-<span class="c1">;;; https://developer.mozilla.org/en-US/docs/Web/CSS/animation</span>
-
+<div class="highlight"><pre>
 <span class="p">(</span><span class="kd">ns </span><span class="nv">example.css</span> <span class="p">(</span><span class="ss">:require</span> <span class="p">[</span><span class="nv">csspool.core</span> <span class="ss">:as</span> <span class="nv">c</span><span class="p">]))</span>
 
 <span class="p">(</span><span class="k">def </span><span class="nv">styles</span>
@@ -92,7 +93,7 @@ from the code below, annotated inline.<br/> Annotations disappear on hover.</p>
 <span class="nt">&lt;/div&gt;</span>
 </pre></div>
 
-<p>The original css I boosted from the animation example from the good folks at
+<p>The original css I boosted from the animation example by the good folks at
 <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/animation">MDN</a>.</p>
       </section>
     </div>
